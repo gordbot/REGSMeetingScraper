@@ -16,14 +16,14 @@ page = requests.get(url)
 
 soup = BeautifulSoup(page.content, 'lxml')
 
-notices = []
-evidence = []
+#notices = []
+#evidence = []
 minutes = []
 
 # Links to Notice of Meeting
 #noticelinks = soup.find_all('a', class_="btn-meeting-notice")
 #for a in noticelinks:
-    notices.append("https:" + a['href'])
+#    notices.append("https:" + a['href'])
 
 # Links to Meeting Evidence
 #evidencelinks = soup.find_all('a', class_="btn-meeting-evidence")
@@ -31,23 +31,34 @@ minutes = []
 #    evidence.append("https:" + a['href'])
 
 # Lnks to Meeting Minutes
-minutelinks = soup.find_all('a', class_="btn-meeting-minutes")
-for a in minutelinks:
-    minutes.append("https:" + a['href'])
+def getMinuteLinks(soup):
+	minutelinks = soup.find_all('a', class_="btn-meeting-minutes")
+	for a in minutelinks:
+		minutes.append("https:" + a['href'])
+	return minutes
 
 # Check the minutes of each meeting for presence of a search term
 # If found, print out the meeting information, the term found, and
 # a url to the meeting page
-for link in minutes:
-    request = requests.get(link)
-    soup = BeautifulSoup(request.content, 'lxml')
-    content = soup.find(id='publicationContent')
+def searchMeetings(minutes):
+	matches = []
+	for link in minutes:
+		request = requests.get(link)
+		soup = BeautifulSoup(request.content, 'lxml')
+		content = soup.find(id='publicationContent')
 
-    issue = soup.find("h2")
+		issue = soup.find("h2")
 
-    for term in searchterms:
-        if term in content.text:
-            print(issue.text)
-            print(term)
-            print(link)
-            print()
+		for term in searchterms:
+			if term in content.text:
+				matches.append([issue.text, term, link])
+	return(matches)
+
+def main():
+	minutes = getMinuteLinks(soup)
+	for match in searchMeetings(minutes):
+		print(match)
+
+
+if __name__ == "__main__":
+    main()
