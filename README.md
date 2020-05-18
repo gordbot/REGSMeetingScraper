@@ -7,3 +7,5 @@ The Standing Joint Committee for the Scrutiny of Regulations (SJSCR or REGS) is 
 My intended purpose for scraping the minutes of the SJSCR meetings is to see if, at any particular meeting, they have mentioned any term I'm interested in.
 
 This lets me follow the committees work and see when regulations or, even, agencies and departments I'm interested in are mentioned in committee.
+
+More detailed information can be found in "[REGS Meeting Scraper](https://www.policygeek.ca/2020/05/regs-meeting-scraper/)," the blog post I wrote on the project.
