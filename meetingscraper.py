@@ -3,18 +3,12 @@
 import requests
 from bs4 import BeautifulSoup
 
-parliament = "42"
-session = "1"
+searchParlSessions = [[43,1],[42,1],[41,2],[41,1]]
 
 # Read in the search terms from file, one search term per line
 with open('searchterms.txt') as f:
     searchterms = f.read().splitlines()
 
-# Get the index page
-url = "https://www.parl.ca/Committees/en/REGS/Meetings?parl=" + parliament + "&session=" + session
-page = requests.get(url)
-
-soup = BeautifulSoup(page.content, 'lxml')
 
 #notices = []
 #evidence = []
@@ -55,9 +49,15 @@ def searchMeetings(minutes):
 	return(matches)
 
 def main():
-	minutes = getMinuteLinks(soup)
-	for match in searchMeetings(minutes):
-		print(match)
+    # Get the index page
+    for parl, session in searchParlSessions:
+        url = "https://www.parl.ca/Committees/en/REGS/Meetings?parl=" + str(parl) + "&session=" + str(session)
+        page = requests.get(url)
+        soup = BeautifulSoup(page.content, 'lxml')
+
+        minutes = getMinuteLinks(soup)
+        for match in searchMeetings(minutes):
+            print("Parliament: ", parl, "Session: ", session, " ",match[0], "[", match[1], "]", match[2])
 
 
 if __name__ == "__main__":
