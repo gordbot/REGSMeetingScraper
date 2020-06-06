@@ -2,51 +2,50 @@
 
 import requests
 from bs4 import BeautifulSoup
+import re
 
-searchParlSessions = [[43,1],[42,1],[41,2],[41,1]]
+searchParlSessions = [[43, 1], [42, 1], [41, 2], [41, 1]]
 
-# Read in the search terms from file, one search term per line
+# Read in the search terms from file, one search term per line.
 with open('searchterms.txt') as f:
     searchterms = f.read().splitlines()
 
 
-#notices = []
-#evidence = []
+# notices = []
+# evidence = []
 minutes = []
 
-# Links to Notice of Meeting
-#noticelinks = soup.find_all('a', class_="btn-meeting-notice")
-#for a in noticelinks:
-#    notices.append("https:" + a['href'])
-
-# Links to Meeting Evidence
-#evidencelinks = soup.find_all('a', class_="btn-meeting-evidence")
-#for a in evidencelinks:
-#    evidence.append("https:" + a['href'])
-
-# Lnks to Meeting Minutes
 def getMinuteLinks(soup):
-	minutelinks = soup.find_all('a', class_="btn-meeting-minutes")
-	for a in minutelinks:
-		minutes.append("https:" + a['href'])
-	return minutes
+    minutelinks = soup.find_all('a', class_="btn-meeting-minutes")
+    for a in minutelinks:
+        minutes.append("https:" + a['href'])
+    return minutes
+
+
+#Given a search term and a text, return true if the term with word boundaries
+#at the both ends exists within the text.
+def find_string(searchString, text):
+    if re.search(r"\b" + re.escape(searchString) + r"\b", text):
+        return True
+    return False
 
 # Check the minutes of each meeting for presence of a search term
 # If found, print out the meeting information, the term found, and
-# a url to the meeting page
+# a url to the meeting page.
+
+
 def searchMeetings(minutes):
-	matches = []
-	for link in minutes:
-		request = requests.get(link)
-		soup = BeautifulSoup(request.content, 'lxml')
-		content = soup.find(id='publicationContent')
+    matches = []
+    for link in minutes:
+        request = requests.get(link)
+        soup = BeautifulSoup(request.content, 'lxml')
+        content = soup.find(id='publicationContent')
+        issue = soup.find("h2")
 
-		issue = soup.find("h2")
-
-		for term in searchterms:
-			if term in content.text:
-				matches.append([issue.text, term, link])
-	return(matches)
+        for term in searchterms:
+            if(find_string(term, content.text)):
+                matches.append([issue.text, term, link])
+    return(matches)
 
 def main():
     # Get the index page
@@ -55,7 +54,9 @@ def main():
         page = requests.get(url)
         soup = BeautifulSoup(page.content, 'lxml')
 
+        #Get the Minutes pages
         minutes = getMinuteLinks(soup)
+        #Print out details for matches
         for match in searchMeetings(minutes):
             print("Parliament: ", parl, "Session: ", session, " ",match[0], "[", match[1], "]", match[2])
 
