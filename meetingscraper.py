@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 
 import requests
 from bs4 import BeautifulSoup
@@ -17,8 +17,8 @@ minutes = []
 
 def getMinuteLinks(soup):
     minutelinks = soup.find_all('a', class_="btn-meeting-minutes")
-    for a in minutelinks:
-        minutes.append("https:" + a['href'])
+    for link in minutelinks:
+        minutes.append("https:" + link['href'])
     return minutes
 
 
@@ -33,7 +33,6 @@ def find_string(searchString, text):
 # If found, print out the meeting information, the term found, and
 # a url to the meeting page.
 
-
 def searchMeetings(minutes):
     matches = []
     for link in minutes:
@@ -42,9 +41,13 @@ def searchMeetings(minutes):
         content = soup.find(id='publicationContent')
         issue = soup.find("h2")
 
+
         for term in searchterms:
             if(find_string(term, content.text)):
-                matches.append([issue.text, term, link])
+                if(issue is not None):
+                    matches.append([issue.text, term, link])
+                else:
+                    matches.append(["Not Available", term, link])
     return(matches)
 
 def main():
@@ -57,8 +60,9 @@ def main():
         #Get the Minutes pages
         minutes = getMinuteLinks(soup)
         #Print out details for matches
-        for match in searchMeetings(minutes):
-            print("Parliament: ", parl, "Session: ", session, " ",match[0], "[", match[1], "]", match[2])
+        meetingMatches = searchMeetings(minutes)
+        for match in meetingMatches:
+            print("Parliament: ", parl, "Session: ", session, " - ",match[0], "[", match[1], "]", match[2])
 
 
 if __name__ == "__main__":
