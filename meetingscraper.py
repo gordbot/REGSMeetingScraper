@@ -10,12 +10,8 @@ searchParlSessions = [[43, 1], [42, 1], [41, 2], [41, 1]]
 with open('searchterms.txt') as f:
     searchterms = f.read().splitlines()
 
-
-# notices = []
-# evidence = []
-minutes = []
-
 def getMinuteLinks(soup):
+    minutes = []
     minutelinks = soup.find_all('a', class_="btn-meeting-minutes")
     for link in minutelinks:
         minutes.append("https:" + link['href'])
@@ -32,7 +28,6 @@ def find_string(searchString, text):
 # Check the minutes of each meeting for presence of a search term
 # If found, print out the meeting information, the term found, and
 # a url to the meeting page.
-
 def searchMeetings(minutes):
     matches = []
     for link in minutes:
@@ -56,13 +51,17 @@ def main():
         url = "https://www.parl.ca/Committees/en/REGS/Meetings?parl=" + str(parl) + "&session=" + str(session)
         page = requests.get(url)
         soup = BeautifulSoup(page.content, 'lxml')
+        meetingMatches = []
 
         #Get the Minutes pages
         minutes = getMinuteLinks(soup)
-        #Print out details for matches
+
+        #Find meetings wiith minutes that contain the search term
         meetingMatches = searchMeetings(minutes)
+
+        #Print out details for matches
         for match in meetingMatches:
-            print("Parliament: ", parl, "Session: ", session, " - ",match[0], "[", match[1], "]", match[2])
+            print("Parliament:", parl, "Session:", session, " - ",match[0], "[", match[1], "]", match[2])
 
 
 if __name__ == "__main__":
